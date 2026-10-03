@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOÁN 9 - THẦY KHẢI</title>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    iframe { border: none; width: 100%; height: 100%; display: block; }
+    
+    /* Thiết kế nút Nổi */
+    .home-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: #2563eb; 
+      color: white;
+      padding: 10px 18px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .home-btn:active { cursor: grabbing; }
+  </style>
+</head>
+<body>
+  
+  <!-- Nút nổi -->
+  <a href="https://thaykhai.github.io/" class="home-btn" id="dragBtn">
+    🏠 Trang Chủ
+  </a>
+
+  <script>
+    // ----------------------------------------------------
+    // 1. NHÚNG GOOGLE APPS SCRIPT
+    // ----------------------------------------------------
+    const _0xlnk = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ZUduc3hBZlFaaWdTT0JBUWk0cDM3VkhxTFdPRk5rVnZmSmJWTndKeVJ1ekxxM0M5VlVEa3lKczhReGlaLU5qTHQvZXhlYw=="; 
+    
+    const frame = document.createElement("iframe");
+    frame.src = atob(_0xlnk);
+    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+    frame.setAttribute("allowfullscreen", "");
+    document.body.appendChild(frame);
+
+    // ----------------------------------------------------
+    // 2. CHỨC NĂNG KÉO THẢ (ĐÃ SỬA LỖI TRƯỢT CHUỘT)
+    // ----------------------------------------------------
+    const btn = document.getElementById("dragBtn");
+    
+    let isDragging = false;
+    let isPressed = false;
+    let offsetX = 0, offsetY = 0;
+
+    btn.addEventListener("dragstart", (e) => e.preventDefault());
+
+    // Khi BẮT ĐẦU kéo
+    const startDrag = (e) => {
+      isPressed = true;
+      isDragging = false;
+      
+      // FIX LỖI: Khóa tương tác chuột của iframe để không bị "nuốt" sự kiện
+      frame.style.pointerEvents = "none";
+      
+      const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      
+      const rect = btn.getBoundingClientRect();
+      offsetX = clientX - rect.left;
+      offsetY = clientY - rect.top;
+    };
+
+    // Khi ĐANG kéo
+    const doDrag = (e) => {
+      if (!isPressed) return;
+      isDragging = true; 
+      
+      const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      
+      let newX = clientX - offsetX;
+      let newY = clientY - offsetY;
+      
+      const maxX = window.innerWidth - btn.offsetWidth;
+      const maxY = window.innerHeight - btn.offsetHeight;
+      newX = Math.max(0, Math.min(newX, maxX));
+      newY = Math.max(0, Math.min(newY, maxY));
+      
+      btn.style.left = newX + "px";
+      btn.style.top = newY + "px";
+      btn.style.bottom = "auto"; 
+    };
+
+    // Khi KẾT THÚC kéo (nhả chuột/tay)
+    const endDrag = () => { 
+      if (isPressed) {
+        isPressed = false;
+        // FIX LỖI: Mở lại tương tác cho iframe để học sinh làm bài
+        frame.style.pointerEvents = "auto";
+        
+        // Chờ 50 mili-giây mới tắt cờ isDragging để chặn sự kiện click
+        setTimeout(() => { isDragging = false; }, 50); 
+      }
+    };
+
+    // Sự kiện Chuột (Máy tính)
+    btn.addEventListener("mousedown", startDrag);
+    document.addEventListener("mousemove", doDrag);
+    document.addEventListener("mouseup", endDrag);
+
+    // Sự kiện Cảm ứng (Điện thoại)
+    btn.addEventListener("touchstart", startDrag, { passive: false });
+    document.addEventListener("touchmove", (e) => {
+      if (isPressed) e.preventDefault();
+      doDrag(e);
+    }, { passive: false });
+    document.addEventListener("touchend", endDrag);
+
+    // ----------------------------------------------------
+    // 3. XÁC NHẬN KHI BẤM VỀ TRANG CHỦ
+    // ----------------------------------------------------
+    btn.addEventListener("click", (e) => {
+      if (isDragging) {
+        e.preventDefault(); 
+      } else {
+        const xacNhan = confirm("Bạn có chắc chắn muốn quay về Trang chủ?\n\n⚠️ LƯU Ý: Nếu chưa nộp bài, kết quả của bạn sẽ bị mất!");
+        if (!xacNhan) e.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>
